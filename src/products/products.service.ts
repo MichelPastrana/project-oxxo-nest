@@ -2,9 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { v4 as uuid } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
+  constructor(
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>
+  ){}
+
   private products: CreateProductDto[] = [
     {
       productId: uuid(),
@@ -30,39 +38,45 @@ export class ProductsService {
   ]
 
   create(createProductDto: CreateProductDto) {
-    if (!createProductDto.productId) createProductDto.productId = uuid()
-    this.products.push(createProductDto)
-    return createProductDto;
+    const product = this.productRepository.save(createProductDto);
+    return product;
   }
 
   findAll() {
-    return this.products;
+    return this.productRepository.find();
   }
 
   findOne(id: string) {
-    const productFound = this.products.filter((product) => product.productId === id)[0];
+    const productFound = this.productRepository.findOneBy({
+      productId: id,
+  });
     if (!productFound) throw new NotFoundException()
     return productFound;
   }
 
   findByProvider(id: string) {
-    const productsFound = this.products.filter((product) => product.provider === id);
+    const productsFound = this.products.filter((product) => product.provider === id)
     if (productsFound.length === 0) throw new NotFoundException()
     return productsFound;
   }
 
-  update(id: string, updateProductDto: UpdateProductDto) {
-    let product = this.findOne(id);
-    product = {
-      ...product,
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const productToUpdate = await this.productRepository.preload({
+      productId: id,
       ...updateProductDto
-    }
-    return product;
+    });
+    if (!productToUpdate) throw new NotFoundException()
+    this.productRepository.save(productToUpdate);
+    return productToUpdate;
   }
 
   remove(id: string) {
-    const { productId } = this.findOne(id);
-    this.products = this.products.filter((product) => product.productId != productId);
-    return this.products;
+    this.findOne(id)
+    this.productRepository.delete({
+      productId: id,
+    });
+    return{
+      message: `Objeto con id ${id} eliminado`
+    }
   }
 }
