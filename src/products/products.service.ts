@@ -13,30 +13,6 @@ export class ProductsService {
     private productRepository: Repository<Product>
   ){}
 
-  private products: CreateProductDto[] = [
-    {
-      productId: uuid(),
-      productName: "Sabritas Normal 48g",
-      price: 29,
-      countSeal: 3,
-      provider: uuid()
-    },
-    {
-      productId: uuid(),
-      productName: "Coca Cola 600ml",
-      price: 40,
-      countSeal: 2,
-      provider: uuid()
-    },
-    {
-      productId: uuid(),
-      productName: "Agua Ciel 1L",
-      price: 15,
-      countSeal: 2,
-      provider: uuid()
-    }
-  ]
-
   create(createProductDto: CreateProductDto) {
     const product = this.productRepository.save(createProductDto);
     return product;
@@ -55,9 +31,7 @@ export class ProductsService {
   }
 
   findByProvider(id: string) {
-    const productsFound = this.products.filter((product) => product.provider === id)
-    if (productsFound.length === 0) throw new NotFoundException()
-    return productsFound;
+    return "ok";
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
