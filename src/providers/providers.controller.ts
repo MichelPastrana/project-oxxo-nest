@@ -20,7 +20,6 @@ export class ProvidersController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     const provider = this.providersService.findOne(id);
-    if (!provider) throw new NotFoundException()
     return provider;
   }
 
