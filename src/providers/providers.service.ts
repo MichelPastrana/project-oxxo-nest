@@ -21,9 +21,10 @@ export class ProvidersService {
   }
 
   findOne(id: string) {
-    return this.providerRepository.findOneBy({
+    const provider = this.providerRepository.findOneBy({
       providerId: id
     })
+    if (!provider) throw new NotFoundException("Provider not found")
   }
 
   findOneByName(name: string){
@@ -35,15 +36,15 @@ export class ProvidersService {
   }
 
   async update(id: string, updateProviderDto: UpdateProviderDto) {
-    const product = await this.providerRepository.preload({
+    const provider = await this.providerRepository.preload({
       providerId: id,
       ...updateProviderDto
     })
-    return this.providerRepository.save(product);
+    return this.providerRepository.save(provider);
   }
 
   remove(id: string) {
-    this.providerRepository.delete({
+    return this.providerRepository.delete({
       providerId: id
     })
   }
