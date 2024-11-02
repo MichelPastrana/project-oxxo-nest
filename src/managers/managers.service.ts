@@ -7,10 +7,10 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class ManagersService {
-  constructor (
+  constructor(
     @InjectRepository(Manager)
     private managerRepository: Repository<Manager>
-  ){}
+  ) { }
 
   create(createManagerDto: CreateManagerDto) {
     return this.managerRepository.save(createManagerDto);
@@ -25,6 +25,7 @@ export class ManagersService {
       managerId: id
     })
     if (!manager) throw new NotFoundException("No manager found")
+    return manager;
   }
 
   async update(id: string, updateManagerDto: UpdateManagerDto) {

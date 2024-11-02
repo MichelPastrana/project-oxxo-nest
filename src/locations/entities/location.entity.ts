@@ -27,13 +27,14 @@ export class Location {
     @Column('simple-array')
     locationLatLng: number[];
     
+    @ApiProperty({default: "1b143ad-5e6c-4ee3-806d-74406d65c714"})
     @OneToOne(()=> Manager, {
-        eager:  true
+        eager:  true,
     })
     @JoinColumn({
-        name: "managerId"
+        name: "managerId",
     })
-    manager: Manager;
+    manager: Manager | string;
 
     @ManyToOne(() => Region, (region) => region.locations)
     @JoinColumn({

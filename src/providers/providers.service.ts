@@ -10,7 +10,7 @@ export class ProvidersService {
   constructor(
     @InjectRepository(Provider)
     private providerRepository: Repository<Provider>
-  ){}
+  ) { }
 
   create(createProviderDto: CreateProviderDto) {
     return this.providerRepository.save(createProviderDto);
@@ -25,9 +25,10 @@ export class ProvidersService {
       providerId: id
     })
     if (!provider) throw new NotFoundException("Provider not found")
+    return provider;
   }
 
-  findOneByName(name: string){
+  findOneByName(name: string) {
     const provider = this.providerRepository.findBy({
       providerName: Like(`%${name}%`)
     })
