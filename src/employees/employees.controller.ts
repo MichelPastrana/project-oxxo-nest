@@ -8,12 +8,16 @@ import { ROLES } from 'src/auth/constants/roles.constants';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Employee } from './entities/employee.entity';
 import { ApiAuth } from 'src/auth/decorators/api.decorator';
+import { AwsService } from 'src/aws/aws.service';
 
 @ApiAuth()
 @ApiTags('Employees')
 @Controller('employees')
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(
+    private readonly employeesService: EmployeesService,
+    private readonly awsService: AwsService,
+  ) { }
 
   @Auth(ROLES.MANAGER)
   @ApiResponse({
@@ -32,10 +36,13 @@ export class EmployeesController {
   }
 
   @Auth(ROLES.MANAGER, ROLES.EMPLOYEE)
-  @Post('upload')
+  @Post(':id/upload')
   @UseInterceptors(FileInterceptor('file'))
-  uploadPhoto(@UploadedFile() file: Express.Multer.File){
-    return "ok";
+  async uploadPhoto(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    const response = await this.awsService.uploadFile(file);
+    return this.employeesService.update(id, {
+      employeePhoto: response
+    })
   }
 
   @Auth(ROLES.MANAGER)
@@ -47,7 +54,7 @@ export class EmployeesController {
   @Auth(ROLES.MANAGER)
   @Get(':id')
   findOne(
-    @Param('id', new ParseUUIDPipe({version: "4"})) 
+    @Param('id', new ParseUUIDPipe({ version: "4" }))
     id: string
   ) {
     return this.employeesService.findOne(id);
@@ -61,14 +68,14 @@ export class EmployeesController {
 
   @Auth(ROLES.EMPLOYEE)
   @Patch(':id')
-  update(@Param('id', new ParseUUIDPipe({version: "4"})) id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+  update(@Param('id', new ParseUUIDPipe({ version: "4" })) id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeesService.update(id, updateEmployeeDto);
   }
 
   @Auth(ROLES.MANAGER)
   @Delete(':id')
   remove(
-    @Param('id', new ParseUUIDPipe({version: "4"}))
+    @Param('id', new ParseUUIDPipe({ version: "4" }))
     id: string
   ) {
     return this.employeesService.remove(id);
