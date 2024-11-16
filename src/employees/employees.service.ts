@@ -1,8 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { v4 as uuid } from "uuid";
-import { last, map } from 'rxjs';
 import { Employee } from './entities/employee.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,7 +18,11 @@ export class EmployeesService {
   }
 
   findAll() {
-    return this.employeeRepository.find();
+    return this.employeeRepository.find({
+      relations: {
+        location: true,
+      }
+    });
   }
 
   findByLocation(id: number) {
@@ -32,8 +34,13 @@ export class EmployeesService {
   }
 
   findOne(id: string) {
-    const employee = this.employeeRepository.findBy({
-      employeeId: id
+    const employee = this.employeeRepository.findOne({
+      where: {
+        employeeId: id,
+      },
+      relations: {
+        location: true,
+      }
     })
     if (!employee) throw new NotFoundException()
     return employee;
